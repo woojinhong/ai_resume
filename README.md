@@ -20,92 +20,85 @@
 
 ### 1. **Applicants (지원자 테이블)**
 
-- **설명**: 지원자의 기본 정보를 저장합니다.
-- **필드 예시**:
-    - `id`: 지원자 고유 식별자 (Primary Key)
-    - `name`: 지원자 이름
-    - `email`: 지원자 이메일
-    - `phone_number`: 연락처
-    - `resume_file_path`: 이력서 파일 경로 또는 링크
-    - `experience_level`: 경력 수준 (신입, 경력)
-    - `created_at`: 이력서 제출일
-    - `updated_at`: 최근 업데이트 날짜
+- 각 PDF 이력서에 포함된 **지원자 정보**를 저장합니다. 이 정보는 이력서에서 자동으로 추출될 수 있으며, 주요 필드만 저장합니다.
+
+| 필드 이름 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | BIGINT | 지원자 고유 식별자 (Primary Key) |
+| `name` | VARCHAR(100) | 지원자 이름 |
+| `email` | VARCHAR(150) | 지원자 이메일 |
+| `phone_number` | VARCHAR(15) | 지원자 전화번호 |
+| `created_at` | TIMESTAMP | 지원자 정보 등록일 |
+| `updated_at` | TIMESTAMP | 지원자 정보 최신화 일자 |
 
 ### 2. **Resumes (이력서 테이블)**
 
-- **설명**: 각 지원자의 이력서 내용과 분석 결과를 저장합니다.
-- **필드 예시**:
-    - `id`: 이력서 고유 식별자 (Primary Key)
-    - `applicant_id`: 지원자 ID (Applicants 테이블의 Foreign Key)
-    - `skills`: 기술 스택 (JSON 형태로 저장 가능)
-    - `experience_years`: 경력 연수
-    - `education`: 학력 정보
-    - `job_fit_score`: 직무 적합성 점수
-    - `ranking`: 직무 적합성 순위
-    - `analysis_status`: 분석 상태 (대기, 진행 중, 완료)
-    - `analysis_result`: GPT API를 통한 분석 결과 요약
-    - `created_at`: 이력서 등록일
-    - `updated_at`: 최근 업데이트 날짜
+- 면접관이 첨부한 이력서 파일에 대한 정보를 저장합니다. 각 PDF 이력서는 해시를 사용해 **중복 여부를 확인**할 수 있으며, **이력서 분석 결과**도 저장합니다.
 
-### 3. **Jobs (직무 테이블)**
+| 필드 이름 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | BIGINT | 이력서 고유 식별자 (Primary Key) |
+| `applicant_id` | BIGINT | 지원자 ID (Applicants 테이블의 Foreign Key) |
+| `resume_hash` | VARCHAR(255) | 이력서 파일 해시 값 (중복 방지를 위한 고유 식별자) |
+| `skills` | JSON | 기술 스택 (JSON 형태로 저장 가능) |
+| `experience_years` | INT | 경력 연수 |
+| `education` | VARCHAR(255) | 학력 정보 |
+| `analysis_result` | JSON | GPT API를 통한 분석 결과 요약 |
+| `created_at` | TIMESTAMP | 이력서 등록일 |
+| `updated_at` | TIMESTAMP | 최근 업데이트 날짜 |
 
-- **설명**: 회사에서 요구하는 직무 정보를 저장합니다. 이 데이터는 지원자의 이력서와 비교하여 직무 적합성을 평가할 때 사용됩니다.
-- **필드 예시**:
-    - `id`: 직무 고유 식별자 (Primary Key)
-    - `title`: 직무 제목 (예: 백엔드 개발자, 데이터 분석가)
-    - `required_skills`: 직무에 필요한 기술 목록 (JSON 형태)
-    - `required_experience`: 요구되는 경력 연수
-    - `created_at`: 직무 생성일
-    - `updated_at`: 최근 업데이트 날짜
+### 3. **Interviewers (면접관 테이블)**
 
-### 4. **JobApplications (직무 지원 테이블)**
+- 면접관(인사 담당자)의 정보를 저장합니다.
 
-- **설명**: 지원자가 특정 직무에 지원한 이력을 관리합니다.
-- **필드 예시**:
-    - `id`: 고유 식별자 (Primary Key)
-    - `applicant_id`: 지원자 ID (Applicants 테이블의 Foreign Key)
-    - `job_id`: 직무 ID (Jobs 테이블의 Foreign Key)
-    - `application_status`: 지원 상태 (대기, 검토 중, 합격, 탈락)
-    - `fit_score`: 지원자와 직무의 적합성 점수
-    - `ranking`: 해당 직무 내에서의 지원자 순위
-    - `submitted_at`: 지원일
+| 필드 이름 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | BIGINT | 면접관 고유 식별자 (Primary Key) |
+| `name` | VARCHAR(100) | 면접관 이름 |
+| `email` | VARCHAR(150) | 면접관 이메일 |
+| `created_at` | TIMESTAMP | 면접관 등록일 |
+| `updated_at` | TIMESTAMP | 면접관 정보 최신화 일자 |
 
-### 5. **Skills (기술 테이블)**
+### 4. **ResumeUploads (이력서 업로드 테이블)**
 
-- **설명**: 각 지원자 또는 직무에서 요구하는 기술을 저장합니다.
-- **필드 예시**:
-    - `id`: 고유 식별자 (Primary Key)
-    - `name`: 기술 이름 (예: Java, Python, AWS)
-    - `category`: 기술 분류 (예: 프로그래밍 언어, 클라우드 서비스)
+- 면접관이 특정 이력서를 업로드한 내역을 기록합니다. 이는 **이력서와 면접관 간의 관계**를 저장하며, 어느 면접관이 어느 지원자의 이력서를 업로드했는지 추적할 수 있습니다.
 
-### 6. **ResumeAnalysis (이력서 분석 테이블)**
+| 필드 이름 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | BIGINT | 업로드 기록 고유 식별자 (Primary Key) |
+| `interviewer_id` | BIGINT | 면접관 ID (Interviewers 테이블의 Foreign Key) |
+| `resume_id` | BIGINT | 이력서 ID (Resumes 테이블의 Foreign Key) |
+| `uploaded_at` | TIMESTAMP | 이력서 업로드 일자 |
 
-- **설명**: 각 이력서의 분석 작업 상태와 결과를 저장합니다.
-- **필드 예시**:
-    - `id`: 분석 작업 고유 식별자 (Primary Key)
-    - `resume_id`: 이력서 ID (Resumes 테이블의 Foreign Key)
-    - `status`: 분석 상태 (예: 대기 중, 분석 중, 완료)
-    - `result`: 분석 결과 (텍스트 요약 또는 JSON 형태로 저장 가능)
-    - `created_at`: 분석 시작일
-    - `completed_at`: 분석 완료일
+### 5. **ResumeSections (이력서 섹션 테이블)**
 
-### 7. **JobCategories (직무 카테고리 테이블)**
+- 이력서의 세부 섹션(예: 자기소개서, 기술 스택, 경력 등)을 나누어 저장하여 **변경된 부분만 재분석**할 수 있도록 처리합니다. 섹션별 해시 값으로 변경 사항을 관리합니다.
 
-- **설명**: 직무를 카테고리별로 분류하여 저장합니다. 예를 들어, "개발", "디자인", "마케팅" 등의 카테고리를 관리할 수 있습니다.
-- **필드 예시**:
-    - `id`: 카테고리 고유 식별자 (Primary Key)
-    - `name`: 카테고리 이름 (예: 개발, 디자인)
-    - `description`: 카테고리 설명
-    - `created_at`: 생성일
-    - `updated_at`: 최근 업데이트 날짜
+| 필드 이름 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | BIGINT | 섹션 고유 식별자 (Primary Key) |
+| `resume_id` | BIGINT | 이력서 ID (Resumes 테이블의 Foreign Key) |
+| `section_type` | VARCHAR(50) | 섹션 유형 (예: 자기소개서, 기술 스택, 경력 등) |
+| `section_content` | TEXT | 섹션 내용 |
+| `section_hash` | VARCHAR(255) | 섹션별 해시 값 (변경된 부분만 식별 및 캐싱) |
+| `updated_at` | TIMESTAMP | 섹션 내용 업데이트 날짜 |
 
-### 8. **Rankings (순위 테이블)**
+### 6. **ResumeViews (이력서 조회 기록 테이블)**
 
-- **설명**: 각 지원자의 직무 적합성에 따른 순위를 저장합니다.
-- **필드 예시**:
-    - `id`: 고유 식별자 (Primary Key)
-    - `job_id`: 직무 ID (Jobs 테이블의 Foreign Key)
-    - `applicant_id`: 지원자 ID (Applicants 테이블의 Foreign Key)
-    - `rank`: 직무 적합성에 따른 지원자 순위
-    - `fit_score`: 직무 적합성 점수
-    - `created_at`: 생성일
+- 면접관이 업로드된 이력서를 조회한 기록을 남깁니다. 이를 통해 **어떤 면접관이 어떤 이력서를 언제 확인했는지** 추적할 수 있습니다.
+
+| 필드 이름 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | BIGINT | 조회 기록 고유 식별자 (Primary Key) |
+| `interviewer_id` | BIGINT | 면접관 ID (Interviewers 테이블의 Foreign Key) |
+| `resume_id` | BIGINT | 이력서 ID (Resumes 테이블의 Foreign Key) |
+| `viewed_at` | TIMESTAMP | 이력서 조회 일자 |
+
+### 요약:
+
+- **Applicants**: PDF에서 추출된 지원자 정보 저장.
+- **Resumes**: 각 이력서의 해시 값과 분석 결과를 저장하여 중복을 피하고 빠르게 분석.
+- **Interviewers**: 면접관(인사 담당자) 정보 저장.
+- **ResumeUploads**: 면접관이 업로드한 이력서 내역을 추적.
+- **ResumeSections**: 이력서의 중요한 섹션(자기소개서, 기술 스택 등)을 나눠 관리하여 부분적인 재분석 가능.
+- **ResumeViews**: 면접관이 어떤 이력서를 조회했는지 기록.
