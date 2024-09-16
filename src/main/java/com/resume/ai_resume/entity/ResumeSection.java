@@ -33,4 +33,8 @@ public class ResumeSection {
     @Column
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime modifiedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resume_id") // 외래 키 컬럼
+    private Resumes resume;
 }

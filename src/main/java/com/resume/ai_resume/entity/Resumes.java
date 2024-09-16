@@ -2,6 +2,9 @@ package com.resume.ai_resume.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 // 지원자 이력서 테이블
 @Entity
@@ -24,12 +27,13 @@ public class Resumes extends TimeStamped {
     @Column(nullable = false, unique = true)
     private String resumeHash;
 
+    private int experienceYears;
+
     //지원자 이력서 학력
     private String education;
     // JSON 데이터를 큰 문자열로 저장
     // 지원자 chatgpt 분석 결과
     @Column(columnDefinition = "TEXT")
     private String analysisResult;
-
 
 }
