@@ -28,20 +28,8 @@
 
 ## 데이터베이스
 
-### 1. **Applicants (지원자 테이블)**
 
-- 각 PDF 이력서에 포함된 **지원자 정보**를 저장합니다. 이 정보는 이력서에서 자동으로 추출될 수 있으며, 주요 필드만 저장합니다.
-
-| 필드 이름 | 타입 | 설명 |
-| --- | --- | --- |
-| `id` | BIGINT | 지원자 고유 식별자 (Primary Key) |
-| `name` | VARCHAR(100) | 지원자 이름 |
-| `email` | VARCHAR(150) | 지원자 이메일 |
-| `phone_number` | VARCHAR(15) | 지원자 전화번호 |
-| `created_at` | TIMESTAMP | 지원자 정보 등록일 |
-| `updated_at` | TIMESTAMP | 지원자 정보 최신화 일자 |
-
-### 2. **Resumes (이력서 테이블)**
+### 1. **Resumes (이력서 테이블)**
 
 - 면접관이 첨부한 이력서 파일에 대한 정보를 저장합니다. 각 PDF 이력서는 해시를 사용해 **중복 여부를 확인**할 수 있으며, **이력서 분석 결과**도 저장합니다.
 
@@ -49,15 +37,18 @@
 | --- | --- | --- |
 | `id` | BIGINT | 이력서 고유 식별자 (Primary Key) |
 | `applicant_id` | BIGINT | 지원자 ID (Applicants 테이블의 Foreign Key) |
-| `resume_hash` | VARCHAR(255) | 이력서 파일 해시 값 (중복 방지를 위한 고유 식별자) |
-| `skills` | JSON | 기술 스택 (JSON 형태로 저장 가능) |
+| `resume_hash` | VARCHAR(255) | 이력서 전체 PDF 파일 해시 값 (중복 방지를 위한 고유 식별자) |
+| `id` | BIGINT | 지원자 고유 식별자 (Primary Key) |
+| `name` | VARCHAR(100) | 지원자 이름 |
+| `email` | VARCHAR(150) | 지원자 이메일 |
+| `phone_number` | VARCHAR(15) | 지원자 전화번호 |
 | `experience_years` | INT | 경력 연수 |
 | `education` | VARCHAR(255) | 학력 정보 |
 | `analysis_result` | JSON | GPT API를 통한 분석 결과 요약 |
 | `created_at` | TIMESTAMP | 이력서 등록일 |
 | `updated_at` | TIMESTAMP | 최근 업데이트 날짜 |
 
-### 3. **Interviewers (면접관 테이블)**
+### 2. **Interviewers (면접관 테이블)**
 
 - 면접관(인사 담당자)의 정보를 저장합니다.
 
@@ -69,18 +60,8 @@
 | `created_at` | TIMESTAMP | 면접관 등록일 |
 | `updated_at` | TIMESTAMP | 면접관 정보 최신화 일자 |
 
-### 4. **ResumeUploads (이력서 업로드 테이블)**
 
-- 면접관이 특정 이력서를 업로드한 내역을 기록합니다. 이는 **이력서와 면접관 간의 관계**를 저장하며, 어느 면접관이 어느 지원자의 이력서를 업로드했는지 추적할 수 있습니다.
-
-| 필드 이름 | 타입 | 설명 |
-| --- | --- | --- |
-| `id` | BIGINT | 업로드 기록 고유 식별자 (Primary Key) |
-| `interviewer_id` | BIGINT | 면접관 ID (Interviewers 테이블의 Foreign Key) |
-| `resume_id` | BIGINT | 이력서 ID (Resumes 테이블의 Foreign Key) |
-| `uploaded_at` | TIMESTAMP | 이력서 업로드 일자 |
-
-### 5. **ResumeSections (이력서 섹션 테이블)**
+### 3. **ResumeSections (이력서 섹션 테이블)**
 
 - 이력서의 세부 섹션(예: 자기소개서, 기술 스택, 경력 등)을 나누어 저장하여 **변경된 부분만 재분석**할 수 있도록 처리합니다. 섹션별 해시 값으로 변경 사항을 관리합니다.
 
@@ -93,22 +74,17 @@
 | `section_hash` | VARCHAR(255) | 섹션별 해시 값 (변경된 부분만 식별 및 캐싱) |
 | `updated_at` | TIMESTAMP | 섹션 내용 업데이트 날짜 |
 
-### 6. **ResumeViews (이력서 조회 기록 테이블)**
-
-- 면접관이 업로드된 이력서를 조회한 기록을 남깁니다. 이를 통해 **어떤 면접관이 어떤 이력서를 언제 확인했는지** 추적할 수 있습니다.
+### 4. **Skills (지원자 기술 스택)**
 
 | 필드 이름 | 타입 | 설명 |
 | --- | --- | --- |
-| `id` | BIGINT | 조회 기록 고유 식별자 (Primary Key) |
-| `interviewer_id` | BIGINT | 면접관 ID (Interviewers 테이블의 Foreign Key) |
-| `resume_id` | BIGINT | 이력서 ID (Resumes 테이블의 Foreign Key) |
-| `viewed_at` | TIMESTAMP | 이력서 조회 일자 |
+| `id` | BIGINT | 이력서 고유 식별자 (Primary Key) |
+| `skills`| VARCHAR(30) | 이력서 기술 스택 (Foreign Key) |
 
 ### 요약:
 
-- **Applicants**: PDF에서 추출된 지원자 정보 저장.
 - **Resumes**: 각 이력서의 해시 값과 분석 결과를 저장하여 중복을 피하고 빠르게 분석.
 - **Interviewers**: 면접관(인사 담당자) 정보 저장.
-- **ResumeUploads**: 면접관이 업로드한 이력서 내역을 추적.
 - **ResumeSections**: 이력서의 중요한 섹션(자기소개서, 기술 스택 등)을 나눠 관리하여 부분적인 재분석 가능.
-- **ResumeViews**: 면접관이 어떤 이력서를 조회했는지 기록.
+- **Skills**: ResumeSections 1대다 연결 테이블.
+
