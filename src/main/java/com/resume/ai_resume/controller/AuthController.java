@@ -19,7 +19,7 @@ public class AuthController {
     @GetMapping("/create-jwt")
     public String createJwt(HttpServletResponse res) {
         // Jwt 생성
-        String token = jwtUtil.createToken("Robbie", UserRoleEnum.USER);
+        String token = jwtUtil.createToken("Robbie");
 
         // Jwt 쿠키 저장
         jwtUtil.addJwtToCookie(token, res);
